@@ -334,6 +334,7 @@ export class VirtualWorkspaceService {
                 return `${fileName.slice(dotIndex + 1).toUpperCase()} File`;
         }
 
+
         private toSystemTime(date: Date | undefined): FileMetaData['created'] {
                 if (!date) return undefined;
                 const time = date.getTime();

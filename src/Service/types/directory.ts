@@ -1,4 +1,7 @@
-import type FileMetaData, { LnkData } from '../../Typings/fileMetaData';
+
+import type FileMetaData from '../../Typings/fileMetaData';
+import type { LnkData } from '../../Typings/fileMetaData';
+
 
 export interface DirectoryData {
         files: FileMetaData[];

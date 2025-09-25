@@ -8,6 +8,7 @@ import Storage from '../../Service/storage';
 import IsValid from '../Functions/validChecker';
 import defaultFavorites from '../Favorites/defaultFavorites';
 import FileAPI from '../../Service/files';
+import { OpenDir } from '../Open/open';
 interface Favorites {
 	name: string;
 	path: string;
@@ -27,10 +28,10 @@ const isDefaultFavorite = async (filePath: string) => {
  * @returns {Promise<void>}
  */
 const writeFavoriteItems = async (favorites: Favorites[]): Promise<void> => {
-	const sidebarCollapseClass = 'sidebar-nav-dropdown-collapsed';
-	const sidebar = await Storage.get('sidebar');
-	let content = '';
-	for (const favorite of favorites) {
+        const sidebarCollapseClass = 'sidebar-nav-dropdown-collapsed';
+        const sidebar = await Storage.get('sidebar');
+        let content = '';
+        for (const favorite of favorites) {
 		if (!favorite.path) continue;
 		const exists = await new FileAPI(favorite.path).exists();
 		const isDefault = await isDefaultFavorite(favorite.path);
@@ -55,9 +56,46 @@ const writeFavoriteItems = async (favorites: Favorites[]): Promise<void> => {
 	const favoriteList = favoriteElement.querySelector('.sidebar-nav-list');
 	favoriteBtnText.textContent = await Translate('Favorites');
 	favoriteList.innerHTML = content;
-	if (sidebar?.hideSection?.favorites) {
-		favoriteElement.classList.add(sidebarCollapseClass);
-	}
+        if (sidebar?.hideSection?.favorites) {
+                favoriteElement.classList.add(sidebarCollapseClass);
+        }
+};
+
+const addVirtualWorkspaceNavigation = (): void => {
+        const sidebarElement =
+                document.querySelector<HTMLElement>('.sidebar') ??
+                document.querySelector<HTMLElement>('.sidebar-nav') ??
+                document.querySelector<HTMLElement>('[class*="sidebar"]');
+
+        if (!sidebarElement || sidebarElement.querySelector('.workspace-nav-section')) return;
+
+        const workspaceSection = document.createElement('div');
+        workspaceSection.className = 'workspace-nav-section';
+        workspaceSection.innerHTML = `
+                <div class="nav-section-header">
+                        <span class="nav-icon">🗂️</span>
+                        <span>IIM Workspaces</span>
+                </div>
+                <div class="nav-items">
+                        <div class="nav-item" data-path="workspace://list">
+                                <span class="nav-icon">📁</span>
+                                <span>All Workspaces</span>
+                        </div>
+                        <div class="nav-item" data-path="workspace://recent">
+                                <span class="nav-icon">🕒</span>
+                                <span>Recent</span>
+                        </div>
+                </div>
+        `;
+
+        workspaceSection.addEventListener('click', (event) => {
+                const target = event.target as HTMLElement;
+                const navItem = target.closest<HTMLElement>('.nav-item');
+                const path = navItem?.dataset?.path;
+                if (path) OpenDir(path);
+        });
+
+        sidebarElement.insertBefore(workspaceSection, sidebarElement.firstChild);
 };
 
 /**
@@ -84,11 +122,12 @@ const createSidebar = async (): Promise<void> => {
 				{ name: 'Videos', path: FavoritesData.VIDEO_PATH },
 				{ name: 'Trash', path: 'xplorer://Trash' }, // eslint-disable-next-line no-mixed-spaces-and-tabs
 		  ];
-	await Promise.all([writeFavoriteItems(_favorites), writeDriveItems()]);
-	updateTheme('root');
+        await Promise.all([writeFavoriteItems(_favorites), writeDriveItems()]);
+        updateTheme('root');
+        addVirtualWorkspaceNavigation();
 
-	const settingBtnText = document.querySelector('#sidebar-setting-btn span');
-	settingBtnText.textContent = await Translate('Settings');
+        const settingBtnText = document.querySelector('#sidebar-setting-btn span');
+        settingBtnText.textContent = await Translate('Settings');
 
 	// Collapse section
 	const sidebarElement = document.querySelector<HTMLElement>('.sidebar');
