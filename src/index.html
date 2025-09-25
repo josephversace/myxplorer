@@ -9,9 +9,51 @@
 		<script src="./index.js"></script>
 	</head>
 
-	<body>
-		<div class="container">
-			<div class="sidebar">
+        <body>
+                <div class="login-overlay" id="login-overlay" aria-hidden="false" role="dialog" aria-modal="true">
+                        <form
+                                class="login-form"
+                                id="login-form"
+                                aria-labelledby="login-title"
+                                aria-describedby="login-subtitle login-hint login-error"
+                                autocomplete="off"
+                                novalidate
+                        >
+                                <h1 class="login-title" id="login-title">Welcome back</h1>
+                                <p class="login-subtitle" id="login-subtitle">Sign in to manage your files</p>
+                                <div class="login-field">
+                                        <label for="login-username">Username</label>
+                                        <input
+                                                id="login-username"
+                                                name="username"
+                                                type="text"
+                                                autocomplete="username"
+                                                autocapitalize="none"
+                                                autocorrect="off"
+                                                spellcheck="false"
+                                                required
+                                        />
+                                </div>
+                                <div class="login-field">
+                                        <label for="login-password">Password</label>
+                                        <input
+                                                id="login-password"
+                                                name="password"
+                                                type="password"
+                                                autocomplete="current-password"
+                                                autocapitalize="none"
+                                                autocorrect="off"
+                                                spellcheck="false"
+                                                required
+                                        />
+                                </div>
+                                <p class="login-hint" id="login-hint">Use <strong>admin / admin</strong> to sign in.</p>
+                                <p class="login-error" id="login-error" role="alert" aria-live="assertive"></p>
+                                <button class="login-submit" type="submit" data-testid="login-submit">Sign in</button>
+                        </form>
+                </div>
+                <div class="container">
+                        <div class="sidebar">
 				<div id="xplorer-brand">
 					<span>Xplorer</span>
 					<img alt="Xplorer" src="Icon/extension/xplorer.svg" />
