@@ -334,10 +334,10 @@ export class VirtualWorkspaceService {
                 return `${fileName.slice(dotIndex + 1).toUpperCase()} File`;
         }
 
-        private toSystemTime(date: Date | string | undefined): FileMetaData['created'] {
+
+        private toSystemTime(date: Date | undefined): FileMetaData['created'] {
                 if (!date) return undefined;
-                const normalizedDate = date instanceof Date ? date : new Date(date);
-                const time = normalizedDate.getTime();
+                const time = date.getTime();
                 const seconds = Math.floor(time / 1000);
                 const nanos = (time - seconds * 1000) * 1e6;
                 return {
