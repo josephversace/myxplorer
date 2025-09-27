@@ -113,10 +113,9 @@ const Recent = async (): Promise<void> => {
 			fileGrid.innerHTML = `
             ${preview}
             <span class="file-grid-filename" id="file-filename">${displayName}</span>
-			<span class="file-modifiedAt" id="file-timestamp">${new Date(recent.properties.last_modified?.secs_since_epoch * 1000).toLocaleString(
-				navigator.language,
-				{ hour12: false }
-			)}</span>
+		<span class="file-modifiedAt" id="file-timestamp">${new Date(
+			(recent.properties.last_modified?.secs_since_epoch ?? Date.now() / 1000) * 1000
+		).toLocaleString(navigator.language, { hour12: false })}</span>
             ${
 				recent.properties.size > 0 && !recent.properties.is_dir
 					? `<span class="file-size" id="file-size">${formatBytes(

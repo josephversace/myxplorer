@@ -105,11 +105,13 @@ const displayFiles = async (
 		fileGrid.setAttribute('draggable', 'true');
 		if (!file.is_trash) {
 			fileGrid.dataset.modifiedAt = String(
-				new Date(file.last_modified.secs_since_epoch * 1000).toLocaleString(navigator.language, { hour12: false })
+				new Date((file.last_modified?.secs_since_epoch ?? Date.now() / 1000) * 1000).toLocaleString(navigator.language, { hour12: false })
 			);
-			fileGrid.dataset.createdAt = String(new Date(file.created.secs_since_epoch * 1000).toLocaleString(navigator.language, { hour12: false }));
+			fileGrid.dataset.createdAt = String(
+				new Date((file.created?.secs_since_epoch ?? Date.now() / 1000) * 1000).toLocaleString(navigator.language, { hour12: false })
+			);
 			fileGrid.dataset.accessedAt = String(
-				new Date(file.last_accessed.secs_since_epoch * 1000).toLocaleString(navigator.language, { hour12: false })
+				new Date((file.last_accessed?.secs_since_epoch ?? Date.now() / 1000) * 1000).toLocaleString(navigator.language, { hour12: false })
 			);
 		}
 		fileGrid.dataset.isdir = String(file.is_dir);

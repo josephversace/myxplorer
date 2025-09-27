@@ -1,9 +1,9 @@
-interface SystemTime {
+export interface SystemTime {
 	nanos_since_epoch: number;
 	secs_since_epoch: number;
 }
 
-interface FileMetaData {
+export interface FileMetaData {
 	file_path: string;
 	basename: string;
 	file_type: string;

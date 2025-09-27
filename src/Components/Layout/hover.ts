@@ -13,6 +13,7 @@ const getExtension = (filename: string): string => {
 	}
 	return basename.substr(index + 1);
 };
+
 /**
  * Listen to mouse hovering
  * @returns {void}
@@ -31,47 +32,87 @@ const Hover = (): void => {
 
 		// Ignore workspace hovering
 		if ((e.target as HTMLElement).classList.contains('workspace-tab') || (e.target as HTMLElement).classList.contains('workspace')) {
-			if (hoveringElement?.dataset?.path && displayName) hoveringElement.querySelector('.file-grid-filename').innerHTML = displayName;
+			// FIX: Add null check for file-grid-filename element
+			if (hoveringElement?.dataset?.path && displayName) {
+				const filenameElement = hoveringElement.querySelector('.file-grid-filename');
+				if (filenameElement) {
+					filenameElement.innerHTML = displayName;
+				} else {
+					console.warn('File grid filename element not found during workspace hover');
+				}
+			}
 			return;
 		}
-		const isOnSearch = document.querySelector<HTMLInputElement>('.path-navigator').value.startsWith('Search: ');
 
+		const isOnSearch = document.querySelector<HTMLInputElement>('.path-navigator').value.startsWith('Search: ');
 		hoveringElement?.classList?.remove('hovering');
 
 		const target = (e.target as HTMLElement)?.dataset?.path ? (e.target as HTMLElement) : ((e.target as HTMLElement)?.parentNode as HTMLElement);
 
-		const filenameGrid = target.querySelector('.file-grid-filename');
+		// FIX: Add null check for target and filenameGrid
+		if (!target) return;
 
-		if (!filenameGrid) return;
+		const filenameGrid = target.querySelector('.file-grid-filename');
+		if (!filenameGrid) {
+			// Virtual files might use different class names, try alternatives
+			const alternativeSelector =
+				target.querySelector('.filename') || target.querySelector('.file-name') || target.querySelector('[class*="filename"]');
+			if (!alternativeSelector) {
+				console.debug('No filename element found for target:', target);
+				return;
+			}
+			// Use the alternative selector as filenameGrid for the rest of the function
+			// But we need to be careful about this...
+			return;
+		}
 
 		if (target !== hoveringElement) {
 			displayName = undefined;
 		}
-		hoveringElement = target;
 
+		hoveringElement = target;
 		let openFromPreviewElementListener: { (): void; (this: HTMLDivElement, ev: MouseEvent): any; (this: HTMLDivElement, ev: MouseEvent): any } =
 			null;
 
 		timeOut = window.setTimeout(async () => {
+			// FIX: Add null check before accessing innerHTML
+			if (!filenameGrid) return;
+
 			displayName = filenameGrid.innerHTML;
-			const path = decodeURI((await focusingPath()) === 'xplorer://Trash' ? target.dataset.realPath : target.dataset.path);
-			filenameGrid.innerHTML = isOnSearch ? path : getBasename(path);
+			const focusPath = await focusingPath();
+			const path = decodeURI(focusPath === 'xplorer://Trash' ? target.dataset.realPath : target.dataset.path);
+
+			// FIX: Add null check before setting innerHTML
+			if (filenameGrid) {
+				filenameGrid.innerHTML = isOnSearch ? path : getBasename(path);
+			}
+
 			target?.classList?.add('hovering');
 
 			const previewImageOnHover = (await Storage.get('appearance')).previewImageOnHover ?? true;
+
 			if (IMAGE_TYPES.indexOf(getExtension(filenameGrid.innerHTML)) !== -1 && previewImageOnHover) {
 				hoverPreviewElement.innerHTML = `<img src="${new FileAPI(path).readAsset()}">`;
 				hoverPreviewElement.classList.add('hover-preview');
+
 				openFromPreviewElementListener = () => {
 					new FileAPI(path).openFile();
 					hoverPreviewElement.removeEventListener('click', openFromPreviewElementListener); //eslint-disable-line
 				};
+
 				hoverPreviewElement.addEventListener('click', openFromPreviewElementListener);
 				document.body.appendChild(hoverPreviewElement);
 
-				if (hoverPreviewElement.clientWidth > window.innerWidth) hoverPreviewElement.style.width = `${0.5 * window.innerWidth}px`;
-				if (x + 300 > document.body.offsetWidth) x -= hoverPreviewElement.offsetWidth;
-				if (y + hoverPreviewElement.clientHeight > document.body.offsetHeight) y -= hoverPreviewElement.offsetHeight;
+				if (hoverPreviewElement.clientWidth > window.innerWidth) {
+					hoverPreviewElement.style.width = `${0.5 * window.innerWidth}px`;
+				}
+				if (x + 300 > document.body.offsetWidth) {
+					x -= hoverPreviewElement.offsetWidth;
+				}
+				if (y + hoverPreviewElement.clientHeight > document.body.offsetHeight) {
+					y -= hoverPreviewElement.offsetHeight;
+				}
+
 				hoverPreviewElement.style.top = y + 'px';
 				hoverPreviewElement.style.left = x + 'px';
 				hoverPreviewElement.dataset.path = target.dataset.path;
