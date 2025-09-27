@@ -195,12 +195,16 @@ class MetadataPanel {
         `;
 	}
 
-	private updateChainOfCustody(file: VirtualFile): void {
-		const custodyEl = document.getElementById('chain-of-custody');
-		if (!custodyEl || !file.chainOfCustody?.length) {
-			custodyEl.innerHTML = '<p class="empty-state">No chain of custody information available</p>';
-			return;
-		}
+        private updateChainOfCustody(file: VirtualFile): void {
+                const custodyEl = this.panelElement?.querySelector('#chain-of-custody') as HTMLElement | null;
+                if (!custodyEl) {
+                        return;
+                }
+
+                if (!file.chainOfCustody?.length) {
+                        custodyEl.innerHTML = '<p class="empty-state">No chain of custody information available</p>';
+                        return;
+                }
 
 		const custodyHtml = file.chainOfCustody
 			.map(
